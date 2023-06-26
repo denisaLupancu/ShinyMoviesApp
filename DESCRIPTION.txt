@@ -1,0 +1,11 @@
+Package: ShinyMoviesApp
+Version: 0.1
+Title: ShinyMoviesApp
+Description: Description of my application
+Author: Denisa
+Maintainer: Denisa
+License: MIT
+Imports:
+    shiny,
+    tidyverse,
+    shinyauthr
