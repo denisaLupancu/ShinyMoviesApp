@@ -1,3 +1,5 @@
+install.packages("shinyauthr")
+
 library(shiny)
 library(shinyauthr)
 library(shiny)
