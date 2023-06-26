@@ -1,3 +1,4 @@
+# install.packages("shinyauthr")
 # library(shiny)
 # 
 # source("global.R")

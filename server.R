@@ -1,3 +1,9 @@
+# Dacă pachetul este deja încărcat, îl descărcăm
+if ("shinyauthr" %in% rownames(installed.packages())) {
+  detach("package:shinyauthr", unload = TRUE)
+}
+
+# Instalăm pachetul shinyauthr
 install.packages("shinyauthr")
 
 library(shiny)
