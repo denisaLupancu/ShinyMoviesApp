@@ -12,14 +12,14 @@ library(RColorBrewer)
 library(tidyr)
 
 ui <- fluidPage(
-  # logout button
-  div(class = "pull-right", shinyauthr::logoutUI(id = "logout")),
-  
-  # login section
-  shinyauthr::loginUI(id = "login"),
-  
-  # Sidebar care se va afisa dupa login
-  uiOutput("sidebarpanel"),
+  # # logout button
+  # div(class = "pull-right", shinyauthr::logoutUI(id = "logout")),
+  # 
+  # # login section
+  # shinyauthr::loginUI(id = "login"),
+  # 
+  # # Sidebar care se va afisa dupa login
+  # uiOutput("sidebarpanel"),
   
   #Style (elemente css)
   tags$head(

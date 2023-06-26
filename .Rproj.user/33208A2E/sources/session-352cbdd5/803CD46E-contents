@@ -1,11 +1,3 @@
-# Dacă pachetul este deja încărcat, îl descărcăm
-if ("shinyauthr" %in% rownames(installed.packages())) {
-  detach("package:shinyauthr", unload = TRUE)
-}
-
-# Instalăm pachetul shinyauthr
-install.packages("shinyauthr")
-
 library(shiny)
 library(shinyauthr)
 library(shiny)
@@ -19,6 +11,68 @@ library(scales)
 library(RColorBrewer)
 library(tidyr)
 
+#dataframe in care sunt stocate date despre user: username, password
+user_base <- tibble::tibble(
+  user = c("admin", "user"),
+  password = sapply(c("admin", "user"), sodium::password_store),
+  permissions = c("admin", "standard"),
+  name = c("User One", "User Two")
+)
+
+movies_data <- read_csv("data/movies.csv")  #utilizată la choise
+movies_data_jh <- read_csv("data/movies.csv") #utilizată la liste cu valori unice
+genre_choices <- c('Toate genurile', sort(unique(movies_data$genre)))
+rating_choices <- c('Ratings', sort(unique(movies_data$rating)))
+unique_years <- c(sort(unique(movies_data_jh$year)))
+measures <- c('score', 'gross')
+col_vals <- c(1,2,3,4,6,13)
+genre_options <- c(sort(unique(movies_data_jh$genre)))
+
+ui <- fluidPage(
+  # logout button
+  div(class = "pull-right", shinyauthr::logoutUI(id = "logout")),
+  
+  # login section
+  shinyauthr::loginUI(id = "login"),
+  
+  # Sidebar care se va afisa dupa login
+  uiOutput("sidebarpanel"),
+  
+  #Style (elemente css)
+  tags$head(
+    tags$title("Dashboard"),
+    tags$style(HTML("
+     .tabbable .nav-tabs, .nav-tabs>li{
+         border-bottom: solid 1px #dddddd;
+     }
+    .col-sm-12 .row{
+        display: flex;
+        flex-direction: row;
+        padding: 30px 52px;
+        align-content: flex-start;
+        align-items: center;
+     }
+     .col-sm-12 .row .col-sm-6:nth-child(1){
+     width: fit-content;
+     }
+     
+     .row .col-sm-12 .col-sm-8{
+     padding-left: 52px;
+     }
+     .tabbable{
+         max-width: 97%;
+     }
+     .col-sm-6 h2:nth-child(2){
+     margin: 0px;
+     }
+     ")),
+    #Icon: https://fontawesome.com/  -- se comporta ca bootstrap
+    tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css")
+    
+  ),
+  theme = shinytheme("united")
+  
+)
 
 server <- function(input, output, session) {
   
@@ -403,4 +457,5 @@ server <- function(input, output, session) {
     }})
 }
 
-shinyServer(server)
+shinyApp(ui = ui, server = server)
+

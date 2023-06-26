@@ -1,0 +1,169 @@
+
+
+library(shiny)
+library(shiny)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(shinythemes)
+library(shinyalert)
+library(ggridges)
+library(scales)
+library(RColorBrewer)
+library(tidyr)
+
+
+server <- function(input, output) {
+  
+  # addResourcePath("images", "D:/LucrareLicenta/1.ShinyApp/IMDb_Movies_App/data")
+  
+  
+  # observeEvent(input$imageInput, {
+  #   if (!is.null(input$imageInput)) {
+  #     output$displayImage <- renderImage({
+  #       list(src = "D:/LucrareLicenta/1.ShinyApp/IMDb_Movies_App/data",
+  #            contentType = input$imageInput$type)
+  #     }, deleteFile = FALSE)
+  #   }
+  # })
+  
+  #---------------------------------- DENSITY ----------------------------------#  
+  
+  observeEvent(req(input$genre_input_1 == c('History', 'Music', 'Sport')), {
+    shinyalert("Date insuficiente pentru generarea unui grafic concludent.", type = "error")
+  })
+  
+  observeEvent(req(input$genre_input_2 == c('History', 'Music', 'Sport')), {
+    shinyalert("Date insuficiente pentru generarea unui grafic concludent.", type = "error")
+  })
+  
+  output$density_plot_1 <- renderPlot({
+    #functie shiny care ajuta la afisarea 
+    movies_data %>%
+      filter(if(input$genre_input_1 != 'Toate genurile') (genre == input$genre_input_1) else TRUE) %>%
+      ggplot(aes(score)) +
+      geom_density(stat = "density",
+                   color = "#4169E1",
+                   lwd = 1, 
+                   fill = "#79c5f0",
+                   alpha = 0.8,
+                   kernel = "gaussian") +
+      labs(x = "Scorul filmelor (de la 1 la 10) ",
+           y = "Densitatea",
+           title = paste0("Densitatea scorurilor pentru filmele de ",input$genre_input_1)) +
+      theme_minimal() +
+      theme(plot.title = element_text(hjust = 0.5)) +
+      theme(plot.title = element_text(face = "bold")) +
+      theme(axis.title = element_text(face = "bold"))
+  })
+  
+  output$density_plot_2 <- renderPlot({
+    
+    movies_data %>%
+      filter(if(input$genre_input_2 != 'Toate genurile') (genre == input$genre_input_2) else TRUE) %>%
+      ggplot(aes(score)) +
+      geom_density(stat = "density",
+                   color = "darkorange4",
+                   lwd = 1,
+                   fill = "#D2042D",
+                   alpha = 0.8,
+                   kernel = "gaussian") +
+      labs(x = "Scorul filmelor (de la 1 la 10)",
+           y = "Densitatea",
+           title = paste0("Densitatea scorurilor pentru filmele de ",input$genre_input_2)) +
+      theme_minimal() +
+      theme(plot.title = element_text(hjust = 0.5)) +
+      theme(plot.title = element_text(face = "bold")) +
+      theme(axis.title = element_text(face = "bold"))
+  })
+  
+  output$ridge_plot_1 <- renderPlot({
+    
+    movies_data %>%
+      ggplot(aes(score, genre, fill = genre)) +
+      geom_density_ridges(scale = 4, size = 1, alpha = 0.7) +
+      scale_y_discrete(limits = rev) +
+      scale_fill_cyclical(
+        name = "Color scheme",
+        values = c( "#D2042D","#79c5f0")
+      ) +
+      labs(x = "Scorul filmelor (de la 1 la 10)",
+           y = "Genul filmelor",
+           title = "Densitatea scorurilor în comparație cu toate genurile") +
+      theme_minimal() +
+      theme(plot.title = element_text(hjust = 0.5)) +
+      theme(plot.title = element_text(face = "bold")) +
+      theme(axis.title = element_text(face = "bold"))
+  })
+  
+  #---------------------------------- NESTED BARS ----------------------------------# 
+  
+  output$bar <- renderPlot({
+    movies_data %>%
+      filter(if(input$var != 'Toate genurile' ) (genre == input$var) else TRUE) %>%
+      filter(if(input$var2 != 'Ratings' ) (rating == input$var2) else TRUE) %>%
+      ggplot(aes(x=year)) + 
+      geom_bar(aes(y = gross, fill="Budget"), alpha = 0.9, size = 1.1, stat='identity') +
+      geom_bar(aes(y = budget, fill = "Gross"), alpha = input$alpha_level, size = 1.1, stat='identity') +
+      scale_y_continuous(labels = comma) +
+      scale_fill_manual(values = c("#79c5f0","#D2042D"),
+                        labels = c("Gross", "Budget")) +
+      labs(x = "Anul realizării filmului",
+           y = "Bugetul filmului și venitul brut în dolari",
+           title=paste0("Performanța pentru ",input$var," care are rating-ul ",input$var2),
+           fill = "Legenda") +
+      theme_minimal() +
+      theme(plot.title = element_text(hjust = 0.5)) +
+      theme(plot.title = element_text(face = "bold")) +
+      theme(axis.title = element_text(face = "bold")) +
+      theme(legend.position = 'right')
+  })
+  
+  #---------------------------------- ORDERED BARS AND TABLES ----------------------------------# 
+  
+  top_10 <- reactive({as.data.frame(
+    movies_data_jh %>%
+      replace_na(list(gross=0, score=0)) %>%
+      filter(year == input$year) %>%
+      filter(genre == input$genre) %>%
+      arrange(input$measure) %>%
+      top_n(10))
+    
+  })
+  
+  top_100 <- reactive({as.data.frame(
+    movies_data_jh %>%
+      replace_na(list(gross=0, score=0)) %>%
+      filter(year == input$year) %>%
+      filter(genre == input$genre) %>%
+      arrange(input$measure) %>%
+      top_n(100))
+    
+  })
+  
+  output$movies_bar <- renderPlot({
+    temp <- as.data.frame(top_10())
+    m_bar <-temp %>% ggplot(
+      aes(x = reorder(name,get(input$measure)), y = get(input$measure))) +
+      geom_bar(stat = 'identity', fill = "dodgerblue1", alpha = 0.8) + 
+      coord_flip() +
+      scale_y_continuous(labels = comma) +
+      labs(x = element_blank(),
+           y = str_to_title(input$measure),
+           title=paste0("Top 10 filme în funcție de ",str_to_title(input$measure)," și de genul ",input$genre," pentru anul ",input$year)) + 
+      theme_minimal() +
+      theme(plot.title = element_text(hjust = 0.5)) +
+      theme(plot.title = element_text(face = "bold")) +
+      theme(axis.title = element_text(face = "bold"))
+    
+    m_bar
+  })
+  
+  output$movies_table <- DT::renderDataTable({
+    if(input$show_table){
+      DT::datatable(top_100()[, col_vals], rownames = FALSE)
+    }})
+  ##DT::datatable -- oferă sortare, paginare, căutare
+}
+
+shinyServer(server)
