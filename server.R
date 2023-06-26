@@ -11,6 +11,7 @@ library(scales)
 library(RColorBrewer)
 library(tidyr)
 
+
 server <- function(input, output, session) {
   
   credentials <- shinyauthr::loginServer(
