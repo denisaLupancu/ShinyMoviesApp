@@ -1,5 +1,5 @@
 Package: ShinyMoviesApp
-Version: 0.1
+Version: 4.2.1
 Title: ShinyMoviesApp
 Description: Description of my application
 Author: Denisa
@@ -7,5 +7,5 @@ Maintainer: Denisa
 License: MIT
 Imports:
     shiny,
-    tidyverse,
+   tidyverse (>= 1.3.0),
     shinyauthr
