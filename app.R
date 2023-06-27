@@ -19,8 +19,8 @@ user_base <- tibble::tibble(
   name = c("User One", "User Two")
 )
 
-movies_data <- read_csv("data/movies.csv")  #utilizată la choise
-movies_data_jh <- read_csv("data/movies.csv") #utilizată la liste cu valori unice
+movies_data <- read_csv("./data/movies.csv")  #utilizată la choise
+movies_data_jh <- read_csv("./data/movies.csv") #utilizată la liste cu valori unice
 genre_choices <- c('Toate genurile', sort(unique(movies_data$genre)))
 rating_choices <- c('Ratings', sort(unique(movies_data$rating)))
 unique_years <- c(sort(unique(movies_data_jh$year)))
